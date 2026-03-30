@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printagram Mail Agent — Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid #334155;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .header h1 span { color: #38bdf8; }
+    .header .subtitle { color: #94a3b8; font-size: 13px; margin-top: 2px; }
+    .header .refresh-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .header .refresh-btn:hover { border-color: #38bdf8; color: #38bdf8; }
+
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+    /* Stat cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-card .label { color: #94a3b8; font-size: 13px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 32px; font-weight: 700; color: #f1f5f9; }
+    .stat-card .value.blue { color: #38bdf8; }
+    .stat-card .value.green { color: #4ade80; }
+    .stat-card .value.amber { color: #fbbf24; }
+    .stat-card .value.purple { color: #a78bfa; }
+
+    /* Grid layout */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+    .card canvas { max-height: 280px; }
+
+    /* Recent emails table */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-bottom: 1px solid #334155;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #1e293b;
+      color: #e2e8f0;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    tbody tr:hover { background: #334155; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      background: #334155;
+    }
+    .confidence-bar {
+      width: 60px;
+      height: 6px;
+      background: #334155;
+      border-radius: 3px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .confidence-bar .fill {
+      height: 100%;
+      border-radius: 3px;
+      background: #4ade80;
+    }
+
+    /* Top senders list */
+    .sender-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #334155;
+      font-size: 13px;
+    }
+    .sender-row:last-child { border-bottom: none; }
+    .sender-name { color: #e2e8f0; }
+    .sender-email { color: #64748b; font-size: 12px; }
+    .sender-count {
+      background: #334155;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .loading { color: #64748b; text-align: center; padding: 40px; }
+
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 500px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .container { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📧 Printagram <span>Mail Agent</span></h1>
+    <div class="subtitle">Email Analytics Dashboard</div>
+  </div>
+  <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+</div>
+
+<div class="container">
+  <!-- Stat cards -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="label">Total Emails</div>
+      <div class="value blue" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Today</div>
+      <div class="value green" id="stat-today">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">This Week</div>
+      <div class="value amber" id="stat-week">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg Confidence</div>
+      <div class="value purple" id="stat-confidence">—</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1: categories pie + daily line -->
+  <div class="grid-2">
+    <div class="card">
+      <h2>Emails by Category</h2>
+      <canvas id="chart-categories"></canvas>
+    </div>
+    <div class="card">
+      <h2>Emails per Day (last 30 days)</h2>
+      <canvas id="chart-daily"></canvas>
+    </div>
+  </div>
+
+  <!-- Charts row 2: languages + top senders + category trends -->
+  <div class="grid-3">
+    <div class="card">
+      <h2>Languages</h2>
+      <canvas id="chart-languages"></canvas>
+    </div>
+    <div class="card">
+      <h2>Top Senders</h2>
+      <div id="top-senders"><div class="loading">Loading...</div></div>
+    </div>
+    <div class="card">
+      <h2>Category Trends (12 weeks)</h2>
+      <canvas id="chart-trends"></canvas>
+    </div>
+  </div>
+
+  <!-- Recent emails table -->
+  <div class="card">
+    <h2>Recent Emails</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>From</th>
+            <th>Subject</th>
+            <th>Category</th>
+            <th>Summary</th>
+            <th>Confidence</th>
+            <th>Lang</th>
+          </tr>
+        </thead>
+        <tbody id="recent-tbody">
+          <tr><td colspan="7" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api/analytics';
+const COLORS = ['#38bdf8','#4ade80','#fbbf24','#f87171','#a78bfa','#fb923c','#2dd4bf','#e879f9','#94a3b8','#f472b6'];
+
+let chartCategories, chartDaily, chartLanguages, chartTrends;
+
+function destroyCharts() {
+  [chartCategories, chartDaily, chartLanguages, chartTrends].forEach(c => c?.destroy());
+}
+
+async function fetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function loadStats() {
+  const s = await fetchJson(`${API}/stats`);
+  document.getElementById('stat-total').textContent = s.total.toLocaleString();
+  document.getElementById('stat-today').textContent = s.today.toLocaleString();
+  document.getElementById('stat-week').textContent = s.week.toLocaleString();
+  document.getElementById('stat-confidence').textContent = s.avgConfidence ? `${(s.avgConfidence * 100).toFixed(0)}%` : '—';
+}
+
+async function loadCategories() {
+  const data = await fetchJson(`${API}/by-category`);
+  const ctx = document.getElementById('chart-categories').getContext('2d');
+  chartCategories = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: data.map(d => `${d.emoji} ${d.label}`),
+      datasets: [{
+        data: data.map(d => d.count),
+        backgroundColor: COLORS.slice(0, data.length),
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 12 }, padding: 12 } }
+      }
+    }
+  });
+}
+
+async function loadDaily() {
+  const data = await fetchJson(`${API}/by-day`);
+  const ctx = document.getElementById('chart-daily').getContext('2d');
+  chartDaily = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(d => d.date.slice(5)), // MM-DD
+      datasets: [{
+        label: 'Emails',
+        data: data.map(d => d.count),
+        borderColor: '#38bdf8',
+        backgroundColor: 'rgba(56,189,248,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { ticks: { color: '#64748b', maxRotation: 45 }, grid: { color: '#1e293b' } },
+        y: { beginAtZero: true, ticks: { color: '#64748b', stepSize: 1 }, grid: { color: '#1e293b' } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+async function loadLanguages() {
+  const data = await fetchJson(`${API}/languages`);
+  const ctx = document.getElementById('chart-languages').getContext('2d');
+  chartLanguages = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: data.map(d => d.language.toUpperCase()),
+      datasets: [{
+        data: data.map(d => d.count),
+        backgroundColor: COLORS.slice(0, data.length),
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 12 }, padding: 10 } }
+      }
+    }
+  });
+}
+
+async function loadTopSenders() {
+  const data = await fetchJson(`${API}/top-senders`);
+  const el = document.getElementById('top-senders');
+  if (!data.length) {
+    el.innerHTML = '<div class="loading">No data yet</div>';
+    return;
+  }
+  el.innerHTML = data.map(s => `
+    <div class="sender-row">
+      <div>
+        <div class="sender-name">${escHtml(s.name || s.email)}</div>
+        ${s.name ? `<div class="sender-email">${escHtml(s.email)}</div>` : ''}
+      </div>
+      <span class="sender-count">${s.count}</span>
+    </div>
+  `).join('');
+}
+
+async function loadTrends() {
+  const data = await fetchJson(`${API}/category-trends`);
+  const weeks = Object.keys(data).sort();
+  const allCats = [...new Set(weeks.flatMap(w => Object.keys(data[w])))];
+
+  const ctx = document.getElementById('chart-trends').getContext('2d');
+  chartTrends = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: weeks.map(w => w.slice(5)), // MM-DD
+      datasets: allCats.map((cat, i) => ({
+        label: cat,
+        data: weeks.map(w => data[w][cat] || 0),
+        backgroundColor: COLORS[i % COLORS.length],
+      }))
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { stacked: true, ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
+        y: { stacked: true, beginAtZero: true, ticks: { color: '#64748b', stepSize: 1 }, grid: { color: '#1e293b' } }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 8 } }
+      }
+    }
+  });
+}
+
+async function loadRecent() {
+  const data = await fetchJson(`${API}/recent`);
+  const tbody = document.getElementById('recent-tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="loading">No emails yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => {
+    const date = new Date(r.received_at);
+    const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const conf = r.confidence ? (r.confidence * 100).toFixed(0) : 0;
+    return `<tr>
+      <td>${dateStr} ${timeStr}</td>
+      <td title="${escHtml(r.from_email || '')}">${escHtml(r.from_name || r.from_email || '—')}</td>
+      <td title="${escHtml(r.subject || '')}">${escHtml(r.subject || '—')}</td>
+      <td><span class="badge">${r.category_emoji} ${escHtml(r.category_label)}</span></td>
+      <td title="${escHtml(r.summary || '')}">${escHtml(r.summary || '—')}</td>
+      <td>
+        <span class="confidence-bar"><span class="fill" style="width:${conf}%"></span></span>
+        ${conf}%
+      </td>
+      <td>${escHtml((r.language || '—').toUpperCase())}</td>
+    </tr>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function loadAll() {
+  destroyCharts();
+  await Promise.allSettled([
+    loadStats(),
+    loadCategories(),
+    loadDaily(),
+    loadLanguages(),
+    loadTopSenders(),
+    loadTrends(),
+    loadRecent(),
+  ]);
+}
+
+loadAll();
+</script>
+
+</body>
+</html>
