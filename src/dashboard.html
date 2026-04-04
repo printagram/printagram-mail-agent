@@ -323,7 +323,7 @@ async function loadCategories() {
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 14 }, padding: 12 } },
+        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 16 }, padding: 12 } },
         ...percentLabels.plugins,
       }
     }
@@ -414,7 +414,7 @@ async function loadCategoryPct() {
         }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 13 }, padding: 8 } },
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 15 }, padding: 8 } },
         tooltip: {
           callbacks: {
             label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
