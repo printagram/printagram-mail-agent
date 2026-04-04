@@ -414,7 +414,7 @@ async function loadCategoryPct() {
         }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 15 }, padding: 8 } },
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 16 }, padding: 8 } },
         tooltip: {
           callbacks: {
             label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
@@ -467,7 +467,7 @@ async function loadTrends() {
         y: { stacked: true, beginAtZero: true, ticks: { color: '#64748b', stepSize: 1 }, grid: { color: '#1e293b' } }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 13 }, padding: 8 } }
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 16 }, padding: 8 } }
       }
     }
   });
