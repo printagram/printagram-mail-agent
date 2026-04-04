@@ -11,8 +11,9 @@ const categories = [
   { code: 'order',         label_ru: 'Заказ',        description: 'Новый заказ, уточнение по заказу, изменение или статус заказа',      emoji: '📦', sort_order: 2 },
   { code: 'payment',       label_ru: 'Оплата',       description: 'Квитанция об оплате, invoice, подтверждение платежа',                emoji: '✅', sort_order: 3 },
   { code: 'complaint',     label_ru: 'Жалоба',       description: 'Проблема с заказом, жалоба, недовольство качеством или сроками',     emoji: '⚠️', sort_order: 4 },
-  { code: 'spam_promo',    label_ru: 'Спам/Реклама', description: 'Маркетинговые рассылки, реклама, spam',                              emoji: '🗑', sort_order: 5 },
-  { code: 'general',       label_ru: 'Общее',        description: 'Всё остальное что не попадает в другие категории. Обязательно поясни в summary что это за письмо и к какой категории оно ближе всего',  emoji: '📨', sort_order: 6 },
+  { code: 'alibaba',       label_ru: 'Alibaba',      description: 'Любые письма от Alibaba, AliExpress, 1688.com — заказы, поставки, уведомления, переписка с поставщиками через платформу. Определяй по домену отправителя (*@alibaba.com, *@aliexpress.com, *@1688.com) или содержанию связанному с этими платформами', emoji: '🏭', sort_order: 5 },
+  { code: 'spam_promo',    label_ru: 'Спам/Реклама', description: 'Маркетинговые рассылки, реклама, spam',                              emoji: '🗑', sort_order: 6 },
+  { code: 'general',       label_ru: 'Общее',        description: 'Всё остальное что не попадает в другие категории. Обязательно поясни в summary что это за письмо и к какой категории оно ближе всего',  emoji: '📨', sort_order: 7 },
 ];
 
 async function seed() {

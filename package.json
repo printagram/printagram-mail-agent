@@ -5,6 +5,7 @@
   "description": "Gmail monitoring agent for Printagram — categorizes emails via Claude API, sends Telegram notifications",
   "main": "src/server.js",
   "scripts": {
+    "build": "echo 'No build step required'",
     "start": "node src/server.js",
     "get-token": "node scripts/get-token.js",
     "seed-categories": "node scripts/seed-categories.js",
