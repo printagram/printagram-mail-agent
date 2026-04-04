@@ -16,9 +16,15 @@ Printagram — типографская и рекламная компания.
 Доступные категории:
 ${categoriesList}
 
+Дополнительные правила:
+- "subcategory": придумай краткую подкатегорию (1-2 слова, snake_case) уточняющую суть письма внутри выбранной категории. Примеры: new_order, status_update, price_list, refund, delivery_issue, newsletter и т.д.
+- "closest_category": если confidence < 0.85, укажи код второй наиболее подходящей категории из списка выше. Если confidence >= 0.85 — null
+
 Формат ответа:
 {
   "category": "<один из кодов выше>",
+  "subcategory": "<уточняющая подкатегория, snake_case, 1-2 слова>",
+  "closest_category": "<код второй категории если confidence < 0.85, иначе null>",
   "summary": "<краткое резюме на русском, 1 строка, до 100 символов>",
   "confidence": <число от 0 до 1>,
   "language": "<язык письма: en, ru, mt, it, другой>"
@@ -47,6 +53,8 @@ ${categoriesList}
 
     return {
       category: parsed.category,
+      subcategory: parsed.subcategory || null,
+      closestCategory: parsed.closest_category || null,
       summary: parsed.summary || '',
       confidence: parsed.confidence || 0,
       language: parsed.language || 'unknown',

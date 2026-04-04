@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Printagram Mail Agent — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f172a;
       color: #e2e8f0;
       min-height: 100vh;
@@ -23,12 +26,12 @@
       justify-content: space-between;
     }
     .header h1 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       color: #f1f5f9;
     }
     .header h1 span { color: #38bdf8; }
-    .header .subtitle { color: #94a3b8; font-size: 13px; margin-top: 2px; }
+    .header .subtitle { color: #94a3b8; font-size: 15px; margin-top: 2px; }
     .header .refresh-btn {
       background: #1e293b;
       border: 1px solid #475569;
@@ -36,7 +39,7 @@
       padding: 8px 16px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 15px;
       transition: all 0.2s;
     }
     .header .refresh-btn:hover { border-color: #38bdf8; color: #38bdf8; }
@@ -56,8 +59,8 @@
       border-radius: 12px;
       padding: 20px;
     }
-    .stat-card .label { color: #94a3b8; font-size: 13px; margin-bottom: 8px; }
-    .stat-card .value { font-size: 32px; font-weight: 700; color: #f1f5f9; }
+    .stat-card .label { color: #94a3b8; font-size: 15px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 34px; font-weight: 700; color: #f1f5f9; }
     .stat-card .value.blue { color: #38bdf8; }
     .stat-card .value.green { color: #4ade80; }
     .stat-card .value.amber { color: #fbbf24; }
@@ -84,7 +87,7 @@
       padding: 20px;
     }
     .card h2 {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 600;
       color: #cbd5e1;
       margin-bottom: 16px;
@@ -96,7 +99,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 15px;
     }
     thead th {
       text-align: left;
@@ -120,7 +123,7 @@
       display: inline-block;
       padding: 2px 8px;
       border-radius: 12px;
-      font-size: 12px;
+      font-size: 14px;
       background: #334155;
     }
     .confidence-bar {
@@ -145,16 +148,16 @@
       align-items: center;
       padding: 8px 0;
       border-bottom: 1px solid #334155;
-      font-size: 13px;
+      font-size: 15px;
     }
     .sender-row:last-child { border-bottom: none; }
     .sender-name { color: #e2e8f0; }
-    .sender-email { color: #64748b; font-size: 12px; }
+    .sender-email { color: #64748b; font-size: 14px; }
     .sender-count {
       background: #334155;
       padding: 2px 10px;
       border-radius: 10px;
-      font-size: 12px;
+      font-size: 14px;
       color: #94a3b8;
     }
 
@@ -263,7 +266,8 @@
 const API = '/api/analytics';
 const COLORS = ['#38bdf8','#4ade80','#fbbf24','#f87171','#a78bfa','#fb923c','#2dd4bf','#e879f9','#94a3b8','#f472b6'];
 
-// Disable datalabels globally — enable per chart
+// Register datalabels plugin, disable globally — enable per chart
+Chart.register(ChartDataLabels);
 Chart.defaults.plugins.datalabels = false;
 
 // Shared datalabels config for pie/doughnut charts
@@ -271,7 +275,7 @@ const percentLabels = {
   plugins: {
     datalabels: {
       color: '#fff',
-      font: { weight: 'bold', size: 13 },
+      font: { weight: 'bold', size: 15 },
       formatter: (value, ctx) => {
         const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
         const pct = total ? ((value / total) * 100).toFixed(1) : 0;
@@ -317,7 +321,7 @@ async function loadCategories() {
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 12 }, padding: 12 } },
+        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 14 }, padding: 12 } },
         ...percentLabels.plugins,
       }
     }
@@ -368,7 +372,7 @@ async function loadLanguages() {
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 12 }, padding: 10 } },
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 14 }, padding: 10 } },
         ...percentLabels.plugins,
       }
     }
@@ -408,7 +412,7 @@ async function loadCategoryPct() {
         }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 8 } },
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 13 }, padding: 8 } },
         tooltip: {
           callbacks: {
             label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
@@ -461,7 +465,7 @@ async function loadTrends() {
         y: { stacked: true, beginAtZero: true, ticks: { color: '#64748b', stepSize: 1 }, grid: { color: '#1e293b' } }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 8 } }
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 13 }, padding: 8 } }
       }
     }
   });

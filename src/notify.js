@@ -7,7 +7,7 @@ function escapeHtml(str) {
 }
 
 // Send email notification to Telegram
-export async function sendNotification({ fromName, fromEmail, subject, category, summary, receivedAt }) {
+export async function sendNotification({ fromName, fromEmail, subject, category, subcategory, closestCategory, summary, receivedAt }) {
   const time = new Date(receivedAt).toLocaleString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
@@ -17,11 +17,14 @@ export async function sendNotification({ fromName, fromEmail, subject, category,
     timeZone: 'Europe/Malta',
   });
 
+  const subcategoryLine = subcategory ? `\n🔹 Subcategory: ${escapeHtml(subcategory)}` : '';
+  const closestLine = closestCategory ? `\n🔸 Closest: ${escapeHtml(closestCategory)}` : '';
+
   const text = `📧 New email
 
 👤 From: ${escapeHtml(fromName)} &lt;${escapeHtml(fromEmail)}&gt;
 📌 Subject: ${escapeHtml(subject)}
-🏷 Category: ${category.emoji} ${escapeHtml(category.label_ru)}
+🏷 Category: ${category.emoji} ${escapeHtml(category.label_ru)}${subcategoryLine}${closestLine}
 📝 Summary: ${escapeHtml(summary)}
 
 ⏰ ${time}`;
